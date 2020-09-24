@@ -1,7 +1,8 @@
-Role Name
+Ansible [Firewalla](https://firewalla.com) Role
 =========
 
-A brief description of the role goes here.
+- Based on [article](https://help.firewalla.com/hc/en-us/articles/360051625034-Guide-How-to-install-Pi-Hole-on-Gold-Beta-)
+- With firewall Gold
 
 Requirements
 ------------
