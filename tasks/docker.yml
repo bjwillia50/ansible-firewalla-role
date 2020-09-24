@@ -1,0 +1,19 @@
+---
+
+- name: "Ensure group docker exists"
+  group:
+    name: docker
+    state: present
+
+- name: "Append docker group to pi user(ease of using docker)"
+  user:
+    name: pi
+    groups: docker
+    append: yes
+
+- name: "Enable docker"
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  ignore_errors: yes

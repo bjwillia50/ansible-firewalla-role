@@ -1,0 +1,30 @@
+version: "3"
+
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+services:
+  pihole:
+    container_name: pihole
+    image: {{ docker.pihole.image }}
+    environment:
+      # set a secure password here or the default will be firewalla
+      WEBPASSWORD: 'firewalla'
+    # Volumes store your data between container upgrades
+    volumes:
+      - './etc-pihole/:/etc/pihole/'
+      - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
+      - './etc-resolv.conf:/etc/resolv.conf'
+      - '/etc/localtime:/etc/localtime:ro'
+    restart: unless-stopped
+
+    networks:
+      default:
+        # static IP address for pi-hole
+        ipv4_address: {{ docker.pihole.ip }}
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        # your chosen docker network here
+        - subnet: {{ docker.network.cidr }}

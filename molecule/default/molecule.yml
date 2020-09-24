@@ -1,0 +1,17 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: ubuntu:bionic
+#    privileged: true
+provisioner:
+  name: ansible
+verifier:
+  name: ansible
+lint: |
+  set -x
+  ansible-lint . -x 106,301
+  yamllint .

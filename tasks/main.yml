@@ -1,0 +1,10 @@
+---
+# tasks file for firewalla-role
+
+
+- include_tasks: docker.yml
+  when: docker.enabled
+
+- include_tasks: docker/{{ item }}.yml
+  when: docker_tasks|length > 0
+  with_items: "{{ docker_tasks }}"

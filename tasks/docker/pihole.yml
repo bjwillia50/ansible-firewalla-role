@@ -1,0 +1,79 @@
+---
+
+- name: "Create pihole directory({{ docker.pihole.rundir }}) if it does not exist"
+  file:
+    owner: pi
+    group: pi
+    path: "{{ docker.pihole.rundir }}"
+    state: directory
+    mode: '0755'
+
+- name: "Docker compose template {{ docker.pihole.rundir }}"
+  template:
+    src: pihole/docker-compose.yaml.j2
+    dest: "{{ docker.pihole.rundir }}/docker-compose.yaml"
+    owner: pi
+    group: pi
+    mode: '0644'
+
+- name: "Docker resolv.conf template {{ docker.pihole.rundir }}"
+  template:
+    src: pihole/resolv.conf.j2
+    dest: "{{ docker.pihole.rundir }}/etc-resolv.conf"
+    owner: pi
+    group: pi
+    mode: '0644'
+
+- name: "Docker compose volume directories"
+  file:
+    owner: pi
+    group: pi
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  with_items:
+    - "{{ docker.pihole.rundir }}/etc-pihole"
+    - "{{ docker.pihole.rundir }}/etc-dnsmasq.d"
+
+- name: "Pull an image"
+  command: "docker pull {{ docker.pihole.image }}"
+
+- name: "Start docker network but not containers"
+  command:
+    cmd: "docker-compose up --no-start"
+    chdir: "{{ docker.pihole.rundir }}"
+
+- name: "get pi-hole_default docker network id"
+  command: "docker network inspect pi-hole_default --format '{{ '{{ .ID }}' }}'"
+  register: piholenetid
+
+- debug:
+   msg: "piholenetid: {{ piholenetid.stdout }}"
+
+- name: "Check lan route"
+  command: "ip route show table wan_routable"
+  register: lanroute
+  ignore_errors: yes
+
+- name: "Add lan route"
+  command: "ip route add {{ docker.network.cidr }} dev br-{{ piholenetid.stdout[:12] }} table lan_routable"
+  when: lanroute.stdout.find("br-{{ piholenetid.stdout[:12] }}") == -1
+
+- name: "Check wan route"
+  command: "ip route show table wan_routable"
+  register: wanroute
+  ignore_errors: yes
+
+  # TODO: use proper module
+- name: "Add wan route"
+  command: "ip route add {{ docker.network.cidr }} dev br-{{ piholenetid.stdout[:12] }} table wan_routable"
+  when: wanroute.stdout.find("br-{{ piholenetid.stdout[:12] }}") == -1
+
+- name: "start containers"
+  command:
+    cmd: "docker-compose up --detach"
+    chdir: "{{ docker.pihole.rundir }}"
+
+# TODO: systemd
+# TODO: Auto run pihole
+

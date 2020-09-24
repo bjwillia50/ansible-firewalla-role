@@ -1,0 +1,14 @@
+---
+# defaults file for firewalla-role
+docker_tasks:
+  - pihole
+docker:
+  enabled: True
+  network:
+    cidr: 172.16.0.0/24
+  pihole:
+    rundir: "/home/pi/.firewalla/run/docker/pi-hole"
+    ip: 172.16.0.2
+    image: "pihole/pihole:latest"
+    nameserver1: 127.0.0.1
+    nameserver2: 1.1.1.1

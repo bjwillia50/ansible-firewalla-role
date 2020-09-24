@@ -1,0 +1,8 @@
+requests
+molecule
+ansible
+ansible-lint
+yamllint
+docker
+flake8
+bashate
